@@ -2,10 +2,12 @@
 
 import sys
 import time
+import re
 from pprint import pprint
-from datetime import timedelta, date
+from datetime import timedelta, date, datetime
 
 from dateutil.easter import easter
+from ics import Calendar, Event
 
 
 def generate_norwegian_holidays(year):
@@ -30,10 +32,34 @@ def generate_norwegian_holidays(year):
     }
 
 
+def make_uid(name: str, year):
+    clean = re.sub(r"\s+", "-", name).lower()
+    return f"no-{clean}-{year}@example.com"
+
+
+def make_ical_file(holidays):
+    cal = Calendar()
+    created = datetime.now().astimezone()
+
+    sorted_holidays = sorted(holidays.items(), key=lambda x: x[1])
+    for name, dt in sorted_holidays:
+        e = Event()
+        e.uid = make_uid(name, dt.year)
+        e.name = name
+        e.begin = dt
+        e.make_all_day()
+        # e.duration = timedelta(days=1)
+        e.created = created
+        cal.events.add(e)
+
+    return cal
+
+
 def main():
     current_year = time.localtime().tm_year
     year = int(sys.argv[1]) if len(sys.argv) > 1 else current_year
-    pprint(generate_norwegian_holidays(year))
+    holidays = generate_norwegian_holidays(year)
+    print(make_ical_file(holidays, 2022, 2024))
 
 
 if __name__ == "__main__":
