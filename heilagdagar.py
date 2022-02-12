@@ -13,20 +13,55 @@ def generate_norwegian_holidays(year):
 
     return [
         # Fixed holidays
-        (date(year, 1, 1), "Nyttårsdag"),
-        (date(year, 12, 25), "Førstedag jul"),
-        (date(year, 12, 26), "Annandag jul"),
-        (date(year, 5, 1), "Internasjonal arbeidardag"),
-        (date(year, 5, 17), "Grunnlovsdagen"),
+        (date(year, 1, 1), "Nyttårsdag", "https://nn.wikipedia.org/wiki/Nytt%C3%A5r"),
+        (date(year, 12, 25), "Førstedag jul", "https://nn.wikipedia.org/wiki/Juledag"),
+        (
+            date(year, 12, 26),
+            "Annandag jul",
+            "https://nn.wikipedia.org/wiki/Andre_juledag",
+        ),
+        (
+            date(year, 5, 1),
+            "Internasjonal arbeidardag",
+            "https://nn.wikipedia.org/wiki/F%C3%B8rste_mai",
+        ),
+        (
+            date(year, 5, 17),
+            "Grunnlovsdagen",
+            "https://nn.wikipedia.org/wiki/Den_norske_grunnlovsdagen",
+        ),
         # Easter, pentecost, etc.
-        (easter_sunday - timedelta(days=3), "Skjærtorsdag"),
-        (easter_sunday - timedelta(days=2), "Langfredag"),
-        (easter_sunday - timedelta(days=1), "Påskeaftan"),
-        (easter_sunday, "Påskedagen"),
-        (easter_sunday + timedelta(days=1), "Annandag påske"),
-        (easter_sunday + timedelta(days=39), "Kristi himmelfartsdag"),
-        (easter_sunday + timedelta(days=49), "Førstedag pinse"),
-        (easter_sunday + timedelta(days=50), "Annandag pinse"),
+        (
+            easter_sunday - timedelta(days=3),
+            "Skjærtorsdag",
+            "https://nn.wikipedia.org/wiki/Skj%C3%A6rtorsdag",
+        ),
+        (
+            easter_sunday - timedelta(days=2),
+            "Langfredag",
+            "https://nn.wikipedia.org/wiki/Langfredag",
+        ),
+        (easter_sunday, "Påskedagen", "https://nn.wikipedia.org/wiki/P%C3%A5skedag"),
+        (
+            easter_sunday + timedelta(days=1),
+            "Annandag påske",
+            "https://nn.wikipedia.org/wiki/Andre_p%C3%A5skedag",
+        ),
+        (
+            easter_sunday + timedelta(days=39),
+            "Kristi himmelfartsdag",
+            "https://nn.wikipedia.org/wiki/Kristi_himmelferdsdag",
+        ),
+        (
+            easter_sunday + timedelta(days=49),
+            "Førstedag pinse",
+            "https://nn.wikipedia.org/wiki/Pinse",
+        ),
+        (
+            easter_sunday + timedelta(days=50),
+            "Annandag pinse",
+            "https://nn.wikipedia.org/wiki/Andre_pinsedag",
+        ),
     ]
 
 
@@ -35,7 +70,8 @@ def make_uid(name: str, year):
     return f"no-{clean}-{year}@example.com"
 
 
-def make_holiday_event(created, name, dt):
+def make_holiday_event(created, holiday):
+    dt, name, url = holiday
     e = Event()
     e.uid = make_uid(name, dt.year)
     e.name = name
@@ -43,13 +79,14 @@ def make_holiday_event(created, name, dt):
     e.make_all_day()
     e.duration = timedelta(days=1)
     e.created = created
+    e.url = url
     return e
 
 
 def make_ical_file(holidays):
     created = datetime.now().astimezone()
     return Calendar(
-        events=[make_holiday_event(created, name, dt) for dt, name in holidays]
+        events=[make_holiday_event(created, holiday) for holiday in holidays]
     )
 
 
